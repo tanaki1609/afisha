@@ -14,8 +14,6 @@ def signup_api_view(request):
     validated_data = serializer.validated_data
     validated_data['is_active'] = False
     user = User.objects.create_user(**serializer.validated_data)
-    # Create 6 symbol code
-    # Create object by ConfirmCode model
     return Response(data={'message': 'User created', 'user_id': user.id})
 
 
