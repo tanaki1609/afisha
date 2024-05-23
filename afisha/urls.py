@@ -20,6 +20,6 @@ from films import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/films/', views.films_list_api_view),
-    path('api/v1/films/<int:id>/', views.films_detail_api_view),
+    path('api/v1/films/', views.films_list_api_view),  # GET->list, POST->create
+    path('api/v1/films/<int:id>/', views.films_detail_api_view),  # GET->item, PUT->update, DELETE->destroy
 ]
