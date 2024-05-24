@@ -24,7 +24,7 @@ class Tag(models.Model):
 class Film(models.Model):
     director = models.ForeignKey(Director, on_delete=models.PROTECT, null=True, related_name='movies')
     tags = models.ManyToManyField(Tag, blank=True)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, null=False)
     description = models.TextField(null=True, blank=True)
     release_year = models.IntegerField()
     rating = models.FloatField()
