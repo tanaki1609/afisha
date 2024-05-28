@@ -7,6 +7,7 @@ from .serializers import FilmSerializer, FilmDetailSerializer, FilmValidateSeria
 
 @api_view(['GET', 'POST'])
 def films_list_api_view(request):
+    print(request.user)
     if request.method == 'GET':
         # step 1: Collect data from DB
         films = Film.objects.select_related('director').prefetch_related('tags', 'reviews').all()
