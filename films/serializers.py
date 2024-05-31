@@ -20,7 +20,7 @@ class TagSerializer(serializers.ModelSerializer):
 class DirectorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Director
-        fields = 'fio age'.split()
+        fields = 'fio year age'.split()
 
 
 class FilmSerializer(serializers.ModelSerializer):

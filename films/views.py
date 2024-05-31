@@ -1,8 +1,72 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Film
-from .serializers import FilmSerializer, FilmDetailSerializer, FilmValidateSerializer
+from .models import Film, Director, Tag
+from .serializers import (FilmSerializer, FilmDetailSerializer,
+                          FilmValidateSerializer, DirectorSerializer, TagSerializer)
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.viewsets import ModelViewSet
+
+
+class TagModelViewSet(ModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    pagination_class = PageNumberPagination
+    lookup_field = 'id'
+
+
+class CustomPagination(PageNumberPagination):
+    page_size = 5
+
+
+class DirectorListCreateAPIView(ListCreateAPIView):
+    queryset = Director.objects.all()
+    serializer_class = DirectorSerializer
+    pagination_class = CustomPagination
+
+
+class DirectorItemAPIView(RetrieveUpdateDestroyAPIView):
+    queryset = Director.objects.all()
+    serializer_class = DirectorSerializer
+    lookup_field = 'id'
+
+
+class FilmListCreateAPIView(ListCreateAPIView):
+    queryset = Film.objects.select_related('director').prefetch_related('tags', 'reviews').all()
+    serializer_class = FilmSerializer
+
+    def create(self, request, *args, **kwargs):
+        # step 0: Validate data
+        serializer = FilmValidateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(status=status.HTTP_400_BAD_REQUEST,
+                            data={'errors': serializer.errors})
+
+        # step 1: Get data from RequestBody
+        name = serializer.validated_data.get('name')  # None
+        text = serializer.validated_data.get('description')  # None
+        release_year = serializer.validated_data.get('release_year')
+        rating = serializer.validated_data.get('rating')
+        is_active = serializer.validated_data.get('is_active')  # Y
+        director_id = serializer.validated_data.get('director_id')
+        tags = serializer.validated_data.get('tags')
+
+        # step 2: Create Film by received data
+        film = Film.objects.create(
+            name=name,
+            description=text,
+            release_year=release_year,
+            rating=rating,
+            is_active=is_active,
+            director_id=director_id,
+        )
+        film.tags.set(tags)
+        film.save()
+
+        # step 3: Return right status and created data
+        return Response(status=status.HTTP_201_CREATED,
+                        data=FilmDetailSerializer(film).data)
 
 
 @api_view(['GET', 'POST'])
@@ -29,7 +93,7 @@ def films_list_api_view(request):
         text = serializer.validated_data.get('description')  # None
         release_year = serializer.validated_data.get('release_year')
         rating = serializer.validated_data.get('rating')
-        is_active = serializer.validated_data.get('is_active') # Y
+        is_active = serializer.validated_data.get('is_active')  # Y
         director_id = serializer.validated_data.get('director_id')
         tags = serializer.validated_data.get('tags')
 
