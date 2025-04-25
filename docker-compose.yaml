@@ -1,0 +1,20 @@
+version: '3'
+services:
+  afisha:
+    build:
+      context: .
+    command: sh -c "python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8001:8000"
+    depends_on:
+      - afisha_db
+  afisha_db:
+    image: "postgres:14"
+    environment:
+      - POSTGRES_DB=db_afisha
+      - POSTGRES_USER=db_afisha_user
+      - POSTGRES_PASSWORD=1234
+    volumes:
+      - 'pgdata:/var/lib/postgresql/data'
+volumes:
+  pgdata:
